@@ -117,7 +117,8 @@ var EfreetiPalace = EfreetiPalace || (function() {
         state.EfreetiPalace = {
             puzzleVersion: "A",
             lavaLevel: 0,
-            clueLevel: -1
+            clueLevel: -1,
+            partyLevel: 'Normal'
         }
     }
 
@@ -437,7 +438,13 @@ var EfreetiPalace = EfreetiPalace || (function() {
                     spawnFxBetweenPoints({x: 1050, y: 1200}, {x: 835, y: 850}, "breath-fire", page.id)
                     spawnFxBetweenPoints({x: 470, y: 1050}, {x: 835, y: 850}, "breath-fire", page.id)
                     spawnFxBetweenPoints({x: 1200, y: 1050}, {x: 835, y: 850}, "breath-fire", page.id)
-                    let dmgText = "<p>The floor is lava, anybody touching takes [[3d10]] fire damage or [[2d10]] if weak party.</p>"
+                    let dmgText = '<p>The floor is lava, anybody touching takes ';
+                    if (state.EfreetiPalace.partyLevel === 'Weak') {
+                        dmgText += '[[2d10]]'
+                    } else {
+                        dmgText += '[[3d10]]'
+                    }
+                    dmgText += ' fire damage</p>'
 
                     if (level >= 10) {
                         let airDmg = Math.floor(level / 10);
@@ -472,6 +479,37 @@ var EfreetiPalace = EfreetiPalace || (function() {
         }
     }
 
+    const clueSrc = 'https://s3.amazonaws.com/files.d20.io/images/97148582/yLldErrvt8Zbty7PQ8YAnw/thumb.png?1573962700';
+
+    const clearClues = () => {
+        const clues = findObjs({
+           _type: "graphic",
+           _subtype: "token",
+           _pageid: page.id,
+            imgsrc: clueSrc,
+           layer: "objects"
+
+       });
+        if (clues) {
+            clues.forEach(clue => clue.remove());
+        }
+    }
+
+    const dropClue = (left, top) => {
+        left = 175 + 70 * left;
+        top = 175 + 70 * top;
+        toFront(createObj("graphic", {
+            subType: "token",
+            left: left,
+            top: top,
+            width: 70,
+            height: 70,
+            imgsrc: clueSrc,
+            pageid: page.id,
+            layer: "objects"
+        }))
+        sendChat("Puzzle", "!contest --level +10");
+    }
 
     const adjustClues = (adj) => {
         let level;
@@ -507,7 +545,6 @@ var EfreetiPalace = EfreetiPalace || (function() {
                 }
                 if (level > state.EfreetiPalace.clueLevel) {
                     sendChat("Shiny Clue Ball", '<h2>Clue ' + (level + 1) + '</h2><p>' + puzzle.clues[level] + '</p>');
-                    sendChat("Arena", "/w gm DM discretion, but, as written, raise the lava level by 10")
                 }
                 state.EfreetiPalace.clueLevel = level;
                 clueBoard.set("notes", text);
@@ -515,21 +552,26 @@ var EfreetiPalace = EfreetiPalace || (function() {
         }
     }
 
-    const startPuzzle = (puzzleCode) => {
-        log("Starting Puzzle " + puzzleCode)
+    const startPuzzle = (puzzleCode, partyLevel) => {
+        log("Starting Puzzle " + puzzleCode + " with " + partyLevel)
         state.EfreetiPalace.puzzleVersion = puzzleCode;
+        if (partyLevel) {
+            state.EfreetiPalace.partyLevel = partyLevel
+        }
         adjustLavaLevel("0");
         adjustClues("-100");
+        clearClues()
         whisperStatus();
     }
 
     const whisperStatus = () => {
         const puzzle = puzzles[state.EfreetiPalace.puzzleVersion];
         if (puzzle) {
-            let text ='/w gm <h2>Puzzle Version ' + state.EfreetiPalace.puzzleVersion + '</h2>';
-            text += '<p><b>Clue Level:</b> ' + (state.EfreetiPalace.clueLevel + 1) + '</p>'
-            text += '<p><b>Lava Level:</b> ' + state.EfreetiPalace.lavaLevel + '</p>'
-            text += '<h3>Solution</h3>'
+            let text ='/w gm <h2>Puzzle Version ' + state.EfreetiPalace.puzzleVersion + '</h2><ul>';
+            text += '<li><b>Party strength:</b> ' + state.EfreetiPalace.partyLevel + '</li>'
+            text += '<li><b>Clue Level:</b> ' + (state.EfreetiPalace.clueLevel + 1) + '</li>'
+            text += '<li><b>Lava Level:</b> ' + state.EfreetiPalace.lavaLevel + '</li>'
+            text += '</ul><h3>Solution</h3><ol>'
             for (var idx = 0; idx < puzzle.solution.length; idx++) {
                 text += '<li>' + puzzle.solution[idx] + '</li>'
             }
@@ -562,14 +604,16 @@ var EfreetiPalace = EfreetiPalace || (function() {
             timer = new EfreetiTimer({name:"PalaceContest", page: page, top:1930, left:1400});
         }
         adjustClues(""  + state.EfreetiPalace.clueLevel)
+
         on('chat:message', (msg) => {
             if (msg.type !== "api" || (!playerIsGM(msg.playerid) && msg.playerid !== 'API')) {
              return;
             }
+
             const args = msg.content.splitArgs();
             if (args[0] === '!contest') {
                 if (args[1] === '--start') {
-                    startPuzzle(args[2])
+                    startPuzzle(args[2], args[3] || undefined)
                 } else if (args[1] === '--level') {
                     adjustLavaLevel(args[2]);
                 }
@@ -585,7 +629,20 @@ var EfreetiPalace = EfreetiPalace || (function() {
                     timer.startClock();
                 }
             } else if (args[0] === '!clue') {
-                adjustClues(args[1])
+                if (args[1] === '--drop') {
+                    let top;
+                    let left;
+                    if (msg.inlinerolls && msg.inlinerolls.length > 1) {
+                        left = msg.inlinerolls[0].results.total
+                        top = msg.inlinerolls[1].results.total
+                    } else {
+                        left = args[2]
+                        top = args[3]
+                    }
+                    dropClue(left, top)
+                } else {
+                    adjustClues(args[1])
+                }
             } else if (args[0] === '!status') {
                 whisperStatus()
             }
