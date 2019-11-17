@@ -4,29 +4,38 @@ var EfreetiTimer = EfreetiTimer || (function() {
         if (! state.EfreetiTimer.timers[this.name]) {
             state.EfreetiTimer.timers[this.name] = { count: 180}
         }
+
+        if (value <= 0) {
+            return;
+        }
         if (value) {
             state.EfreetiTimer.timers[this.name].count = value;
         }
 
         var pagetop = this.top || (this.page.get("height") * 70) / 2;
         var pageleft = this.left || (this.page.get("width") * 70) / 2;
-        this.display = findObjs({
+        var fontsize = this.fontsize || 200;
+
+        var displays = findObjs({
            _pageid: this.page.id,
            _type: "text",
            top: pagetop,
            left: pageleft,
            layer: "map"
-       })[0];
+        });
+        if (displays && displays.length > 0) {
+            displays[0].remove();
+            this.display = undefined;
+        }
 
         if(!this.display) {
             this.display = createObj("text", {
                 pageid: this.page.id,
                 top: pagetop,
                 left: pageleft,
-                name:"timer_" + this.name,
                 layer: "map",
-                color: "rgb(0, 0, 0)",
-                font_size: 56,
+                color: this.color,
+                font_size: fontsize,
                 font_family: "Contrail",
                 text: asMinutesSeconds(state.EfreetiTimer.timers[this.name].count)
             });
@@ -54,14 +63,14 @@ var EfreetiTimer = EfreetiTimer || (function() {
     var render = function(timer) {
         state.EfreetiTimer.timers[timer.name].count = state.EfreetiTimer.timers[timer.name].count - 1;
         var output = asMinutesSeconds(state.EfreetiTimer.timers[timer.name].count);
-        var textcolor = state.EfreetiTimer.timers[timer.name].count > 60 ? "rgb(0, 0, 0)" : "rgb(206, 32, 41)";
+        var textcolor = state.EfreetiTimer.timers[timer.name].count > 10 ? timer.color : "rgb(206, 32, 41)";
         timer.display.set({
             text: output,
             color: textcolor
         });
         if(state.EfreetiTimer.timers[timer.name].count < 1) {
             timer.stopClock();
-            sendChat("HAHAHA", "!contest --level +5");
+            sendChat("Puzzle", "!contest --level +5");
         }
     }
 
@@ -74,6 +83,8 @@ var EfreetiTimer = EfreetiTimer || (function() {
             _type: "page",
             name: "An Appeal to Logic",
         })[0];
+        this.color = opts.color || "rgb(255, 255, 255)"
+
     }
 
     var isRunning = function() {
@@ -88,9 +99,27 @@ var EfreetiTimer = EfreetiTimer || (function() {
 
     return timer;
 }());
+on('ready', () => {
+    'use strict';
+    // Check if the namespaced property exists, creating it if it doesn't
+    if( ! state.EfreetiTimer ) {
+        state.EfreetiTimer = {
+            version: 1.0,
+            timers: {}
+        };
+    }
+});
 
 
 var EfreetiPalace = EfreetiPalace || (function() {
+
+    if (! state.EfreetiPalace) {
+        state.EfreetiPalace = {
+            puzzleVersion: "A",
+            lavaLevel: 0,
+            clueLevel: -1
+        }
+    }
 
     let timer;
     let page
@@ -360,13 +389,32 @@ var EfreetiPalace = EfreetiPalace || (function() {
         ]
     }
     let currentPaths;
-    let currentLevel = 0;
-    const adjustLevel = (adj) => {
+
+    const redrawLava = (level, arr) => {
+        let temp = arr.map(config => {
+            return createObj("path", Object.assign({
+               "fill": "#ff0000",
+               "stroke": "#ff0000",
+               "rotation": 0,
+               "stroke_width": 0,
+               "scaleX": 1,
+               "scaleY": 1,
+               "layer": "objects",
+               "_pageid": page.id}, config));
+        });
+        if (currentPaths !== undefined) {
+            currentPaths.forEach(path => path.remove());
+        }
+        currentPaths = temp;
+        state.EfreetiPalace.lavaLevel = parseInt(level);
+    }
+
+    const adjustLavaLevel = (adj) => {
         let level;
         if (adj.indexOf("+") === 0) {
-            level = currentLevel + parseInt(adj.substring(1));
+            level = state.EfreetiPalace.lavaLevel + parseInt(adj.substring(1));
         } else if (adj.indexOf("-") === 0) {
-            level = currentLevel - parseInt(adj.substring(1));
+            level = state.EfreetiPalace.lavaLevel - parseInt(adj.substring(1));
         } else {
             level = adj;
         }
@@ -379,7 +427,8 @@ var EfreetiPalace = EfreetiPalace || (function() {
             }
 
             if (match) {
-                if (level > currentLevel) {
+                if (level > state.EfreetiPalace.lavaLevel) {
+                    sendChat("Arena", "<h2>The center of the arena begins to rumble</h2>")
                     spawnFxBetweenPoints({x: 470, y: 620}, {x: 835, y: 850}, "breath-fire", page.id)
                     spawnFxBetweenPoints({x: 1200, y: 620}, {x: 835, y: 850}, "breath-fire", page.id)
                     spawnFxBetweenPoints({x: 630, y: 500}, {x: 835, y: 850}, "breath-fire", page.id)
@@ -395,61 +444,52 @@ var EfreetiPalace = EfreetiPalace || (function() {
                         if (airDmg > 4) {
                             airDmg = 4;
                         }
-                        dmgText += "<p>The air is also lava, everybody takes " + airDmg + " fire damage</p>"
+                        dmgText += "<p>The air is also lava, everybody takes [[1d0+" + airDmg + "]] fire damage</p>"
                     }
-                    sendChat("Lava", dmgText)
+
+                    setTimeout((() => {
+                        redrawLava(level, match[1])
+                        sendChat("Arena", dmgText)
+                    }), 1000)
+                } else {
+                    redrawLava(level, match[1])
                 }
 
-                let temp = match[1].map(config => {
-                    return createObj("path", Object.assign({
-                   "fill": "#ff0000",
-                   "stroke": "#ff0000",
-                   "rotation": 0,
-                   "stroke_width": 0,
-                   "scaleX": 1,
-                   "scaleY": 1,
-                   "layer": "objects",
-                   "_pageid": page.id}, config));
-                });
-                if (currentPaths !== undefined) {
-                    currentPaths.forEach(path => path.remove());
-                }
-                currentPaths = temp;
-                currentLevel = parseInt(level);
+
             } else {
                 if (currentPaths !== undefined) {
                     currentPaths.forEach(path => path.remove());
                     currentPaths = undefined;
                 }
-                currentLevel = 0;
+                state.EfreetiPalace.lavaLevel = 0;
             }
         } else {
             if (currentPaths !== undefined) {
                 currentPaths.forEach(path => path.remove());
                 currentPaths = undefined;
             }
-            currentLevel = 0;
+            state.EfreetiPalace.lavaLevel = 0;
         }
     }
 
-    let currentClueLevel = -1;
-    const adjustClues = (puzzleCode, adj) => {
+
+    const adjustClues = (adj) => {
         let level;
         if (adj.indexOf("+") === 0) {
-            level = currentClueLevel + parseInt(adj.substring(1));
+            level = state.EfreetiPalace.clueLevel + parseInt(adj.substring(1));
         } else if (adj.indexOf("-") === 0) {
-            level = currentClueLevel - parseInt(adj.substring(1));
+            level = state.EfreetiPalace.clueLevel - parseInt(adj.substring(1));
         } else {
-            level = adj;
+            level = parseInt(adj);
         }
         if (level < 0) {
             level =  -1;
         }
         if (level < 0) {
-            currentClueLevel = level;
+            state.EfreetiPalace.clueLevel = level;
             clueBoard.set("notes", '');
         } else {
-            const puzzle = puzzles[puzzleCode]
+            const puzzle = puzzles[state.EfreetiPalace.puzzleVersion]
             if (puzzle) {
                 if (level > puzzle.clues.length -1) {
                     level = puzzle.clues.length -1;
@@ -465,27 +505,41 @@ var EfreetiPalace = EfreetiPalace || (function() {
                     }
                     text += '</ol>'
                 }
-                currentClueLevel = level;
+                if (level > state.EfreetiPalace.clueLevel) {
+                    sendChat("Shiny Clue Ball", '<h2>Clue ' + (level + 1) + '</h2><p>' + puzzle.clues[level] + '</p>');
+                    sendChat("Arena", "/w gm DM discretion, but, as written, raise the lava level by 10")
+                }
+                state.EfreetiPalace.clueLevel = level;
                 clueBoard.set("notes", text);
             }
         }
     }
 
-    const whisperSolution = (puzzleCode) => {
-        const puzzle = puzzles[puzzleCode];
+    const startPuzzle = (puzzleCode) => {
+        log("Starting Puzzle " + puzzleCode)
+        state.EfreetiPalace.puzzleVersion = puzzleCode;
+        adjustLavaLevel("0");
+        adjustClues("-100");
+        whisperStatus();
+    }
+
+    const whisperStatus = () => {
+        const puzzle = puzzles[state.EfreetiPalace.puzzleVersion];
         if (puzzle) {
-            let text = '/w gm <ol>'
-                for (var idx = 0; idx < puzzle.solution.length; idx++) {
-                    text += '<li>' + puzzle.solution[idx] + '</li>'
-                }
-                text += '</ol>'
-            sendChat("Solution for Puzzle " + puzzleCode, text);
+            let text ='/w gm <h2>Puzzle Version ' + state.EfreetiPalace.puzzleVersion + '</h2>';
+            text += '<p><b>Clue Level:</b> ' + (state.EfreetiPalace.clueLevel + 1) + '</p>'
+            text += '<p><b>Lava Level:</b> ' + state.EfreetiPalace.lavaLevel + '</p>'
+            text += '<h3>Solution</h3>'
+            for (var idx = 0; idx < puzzle.solution.length; idx++) {
+                text += '<li>' + puzzle.solution[idx] + '</li>'
+            }
+            text += '</ol>'
+
+            sendChat("Puzzle", text)
         }
     }
 
-
     const registerEventHandlers = () => {
-
         page = findObjs({
             _type: "page",
             name: "An Appeal to Logic",
@@ -495,35 +549,47 @@ var EfreetiPalace = EfreetiPalace || (function() {
             name: "Clues"
         })[0];
 
+        //API Sandbox -- reattach any existing shapes to the in memory object.  numeric levels are already fetched from state
+        currentPaths = findObjs({
+             _type: "path",
+             _pageid: page.id,
+            fill: "#ff0000",
+            stroke: "#ff0000"
+         });
+
+        //create a timer
+        if (timer === undefined) {
+            timer = new EfreetiTimer({name:"PalaceContest", page: page, top:1930, left:1400});
+        }
+        adjustClues(""  + state.EfreetiPalace.clueLevel)
         on('chat:message', (msg) => {
             if (msg.type !== "api" || (!playerIsGM(msg.playerid) && msg.playerid !== 'API')) {
-            return;
-        }
-        const args = msg.content.splitArgs();
-        if (args[0] === '!contest') {
-            if (args[1] === '--level') {
-                adjustLevel(args[2]);
+             return;
             }
-        } else if (args[0] === '!timer') {
-            if (timer === undefined) {
-                timer = new EfreetiTimer({name:"PalaceContest", page: page, top:1000, left:600});
-            }
-            if (args[1] === '--start') {
-                if (timer.isRunning() === true) {
-                    timer.stopClock();
+            const args = msg.content.splitArgs();
+            if (args[0] === '!contest') {
+                if (args[1] === '--start') {
+                    startPuzzle(args[2])
+                } else if (args[1] === '--level') {
+                    adjustLavaLevel(args[2]);
                 }
-                timer.startClock(parseInt(args[2] || 180));
-            } else if (args[1] === '--pause') {
-                timer.stopClock()
-            } else if (args[1] === '--continue') {
-                timer.startClock();
+            } else if (args[0] === '!timer') {
+                if (args[1] === '--start') {
+                    if (timer.isRunning() === true) {
+                        timer.stopClock();
+                    }
+                    timer.startClock(parseInt(args[2] || 180));
+                } else if (args[1] === '--pause') {
+                    timer.stopClock()
+                } else if (args[1] === '--continue') {
+                    timer.startClock();
+                }
+            } else if (args[0] === '!clue') {
+                adjustClues(args[1])
+            } else if (args[0] === '!status') {
+                whisperStatus()
             }
-        } else if (args[0] === '!clue') {
-            adjustClues(args[1], args[2])
-        } else if (args[0] === '!solution') {
-            whisperSolution(args[1]);
-        }
-    });
+        });
     }
 
     return {
@@ -534,11 +600,4 @@ var EfreetiPalace = EfreetiPalace || (function() {
 on('ready', () => {
     'use strict';
     EfreetiPalace.registerEventHandlers();
-    // Check if the namespaced property exists, creating it if it doesn't
-    if( ! state.EfreetiTimer ) {
-        state.EfreetiTimer = {
-            version: 1.0,
-            timers: {}
-        };
-    }
 });
