@@ -70,7 +70,7 @@ var EfreetiTimer = EfreetiTimer || (function() {
         });
         if(state.EfreetiTimer.timers[timer.name].count < 1) {
             timer.stopClock();
-            sendChat("Puzzle", "!contest --level +5");
+            sendChat("Puzzle", "!contest --airdamage");
         }
     }
 
@@ -409,7 +409,9 @@ var EfreetiPalace = EfreetiPalace || (function() {
         currentPaths = temp;
         state.EfreetiPalace.lavaLevel = parseInt(level);
     }
-
+    const dmgTemplate = (name, description, roll) => {
+        return "&{template:npcaction} {{damage=1}} {{dmg1flag=1}} {{name="+ name +"}} {{rname=The Arena}} {{always=1}} {{dmg1="+roll+"}} {{dmg1type=Fire}} " + (description !== undefined ? "{{description="+description+"}}": "")
+    }
     const adjustLavaLevel = (adj) => {
         let level;
         if (adj.indexOf("+") === 0) {
@@ -429,7 +431,7 @@ var EfreetiPalace = EfreetiPalace || (function() {
 
             if (match) {
                 if (level > state.EfreetiPalace.lavaLevel) {
-                    sendChat("Arena", "<h2>The center of the arena begins to rumble</h2>")
+                    sendChat("The Arena", "&{template:spell} {{level=Rising all the time}} {{name=Lava}} {{castingtime=Now}} {{target=The Floor}} {{m=1}} {{material=Lava}} {{charname=The Pillars}}")
                     spawnFxBetweenPoints({x: 470, y: 620}, {x: 835, y: 850}, "breath-fire", page.id)
                     spawnFxBetweenPoints({x: 1200, y: 620}, {x: 835, y: 850}, "breath-fire", page.id)
                     spawnFxBetweenPoints({x: 630, y: 500}, {x: 835, y: 850}, "breath-fire", page.id)
@@ -438,30 +440,20 @@ var EfreetiPalace = EfreetiPalace || (function() {
                     spawnFxBetweenPoints({x: 1050, y: 1200}, {x: 835, y: 850}, "breath-fire", page.id)
                     spawnFxBetweenPoints({x: 470, y: 1050}, {x: 835, y: 850}, "breath-fire", page.id)
                     spawnFxBetweenPoints({x: 1200, y: 1050}, {x: 835, y: 850}, "breath-fire", page.id)
-                    let dmgText = '<p>The floor is lava, anybody touching takes ';
+                    let dmgText;
                     if (state.EfreetiPalace.partyLevel === 'Weak') {
-                        dmgText += '[[2d10]]'
+                        dmgText = '[[2d10]]'
                     } else {
-                        dmgText += '[[3d10]]'
-                    }
-                    dmgText += ' fire damage</p>'
-
-                    if (level >= 10) {
-                        let airDmg = Math.floor(level / 10);
-                        if (airDmg > 4) {
-                            airDmg = 4;
-                        }
-                        dmgText += "<p>The air is also lava, everybody takes [[1d0+" + airDmg + "]] fire damage</p>"
+                        dmgText = '[[3d10]]'
                     }
 
                     setTimeout((() => {
                         redrawLava(level, match[1])
-                        sendChat("Arena", dmgText)
+                        sendChat("The Arena", dmgTemplate("The Floor is Lava!", "Lava pours from the pillars, raising the level in the room", dmgText))
                     }), 1000)
                 } else {
                     redrawLava(level, match[1])
                 }
-
 
             } else {
                 if (currentPaths !== undefined) {
@@ -508,7 +500,7 @@ var EfreetiPalace = EfreetiPalace || (function() {
             pageid: page.id,
             layer: "objects"
         }))
-        sendChat("Puzzle", "!contest --level +10");
+        sendChat("Puzzle", "!contest --level +5");
     }
 
     const adjustClues = (adj) => {
@@ -544,7 +536,7 @@ var EfreetiPalace = EfreetiPalace || (function() {
                     text += '</ol>'
                 }
                 if (level > state.EfreetiPalace.clueLevel) {
-                    sendChat("Shiny Clue Ball", '<h2>Clue ' + (level + 1) + '</h2><p>' + puzzle.clues[level] + '</p>');
+                    sendChat("Shiny Clue Ball", "&{template:spell} {{level=From your Shiny Clue Ball}} {{name=Clue " + (level + 1) + "}} {{castingtime=Now}} {{target=Your Ears}} {{v=1}} {{material=Lava}} {{description=" + puzzle.clues[level] +"}}")
                 }
                 state.EfreetiPalace.clueLevel = level;
                 clueBoard.set("notes", text);
@@ -584,7 +576,7 @@ var EfreetiPalace = EfreetiPalace || (function() {
     const registerEventHandlers = () => {
         page = findObjs({
             _type: "page",
-            name: "An Appeal to Logic",
+            name: "The Trial of Strength and Cunning",
         })[0];
         clueBoard = findObjs({
             _type: "handout",
@@ -616,6 +608,22 @@ var EfreetiPalace = EfreetiPalace || (function() {
                     startPuzzle(args[2], args[3] || undefined)
                 } else if (args[1] === '--level') {
                     adjustLavaLevel(args[2]);
+                } else if (args[1] === '--airdamage') {
+                    if (state.EfreetiPalace.lavaLevel >= 10) {
+                        let airDmg = Math.floor(state.EfreetiPalace.lavaLevel / 10);
+                        if (airDmg > 4) {
+                            airDmg = 4;
+                        }
+                        sendChat("Arena", dmgTemplate("The Air is Lava!", "The air is growing painfully warm", "[[1d0 + " + airDmg + "]]"))
+                    }
+                } else if (args[1] === '--lavadamage') {
+                    let dmgText;
+                    if (state.EfreetiPalace.partyLevel === 'Weak') {
+                        dmgText = '[[2d10]]'
+                    } else {
+                        dmgText = '[[3d10]]'
+                    }
+                    sendChat("Arena", dmgTemplate("Lava is everywhere!", "Touching lava is not recommended", dmgText))
                 }
             } else if (args[0] === '!timer') {
                 if (args[1] === '--start') {
