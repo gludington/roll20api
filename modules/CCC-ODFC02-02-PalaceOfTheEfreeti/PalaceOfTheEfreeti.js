@@ -1,5 +1,20 @@
 var EfreetiTimer = EfreetiTimer || (function() {
 
+
+    var getDisplay = () => {
+        var displays = findObjs({
+            _pageid: this.page.id,
+            _type: "text",
+            top: pagetop,
+            left: pageleft,
+            layer: "map"
+        });
+        if (displays && displays.length > 0) {
+            displays[0].remove();
+            this.display = undefined;
+        }
+    }
+
     var startClock = function(value) {
         if (! state.EfreetiTimer.timers[this.name]) {
             state.EfreetiTimer.timers[this.name] = { count: 180}
@@ -28,18 +43,17 @@ var EfreetiTimer = EfreetiTimer || (function() {
             this.display = undefined;
         }
 
-        if(!this.display) {
-            this.display = createObj("text", {
-                pageid: this.page.id,
-                top: pagetop,
-                left: pageleft,
-                layer: "map",
-                color: this.color,
-                font_size: fontsize,
-                font_family: "Contrail",
-                text: asMinutesSeconds(state.EfreetiTimer.timers[this.name].count)
-            });
-        }
+        this.display = createObj("text", {
+            pageid: this.page.id,
+            top: pagetop,
+            left: pageleft,
+            layer: "map",
+            color: this.color,
+            font_size: fontsize,
+            font_family: "Contrail",
+            text: asMinutesSeconds(state.EfreetiTimer.timers[this.name].count)
+        });
+
         toFront(this.display);
         this.clocktimer = setInterval(() => {
             render(this)
@@ -472,7 +486,7 @@ var EfreetiPalace = EfreetiPalace || (function() {
     }
 
     const clueSrc = 'https://s3.amazonaws.com/files.d20.io/images/97148582/yLldErrvt8Zbty7PQ8YAnw/thumb.png?1573962700';
-
+    const lavaRockName = ''
     const clearClues = () => {
         const clues = findObjs({
            _type: "graphic",
@@ -556,6 +570,30 @@ var EfreetiPalace = EfreetiPalace || (function() {
         whisperStatus();
     }
 
+    let lavaRock;
+    let lavaRoper;
+    const winPuzzle = () => {
+        spawnFx(860, 860, 'explode-fire', page.id);
+
+        lavaRock = createObj("graphic", {
+            subType: "token",
+            left: 840,
+            top: 800,
+            width: 260,
+            height: 260,
+            imgsrc: 'https://s3.amazonaws.com/files.d20.io/images/97801007/T0UT2kl80rKJGwDI9pPr3w/thumb.png?1574633761',
+            pageid: page.id,
+            layer: "objects"
+        });
+        toFront(lavaRock);
+    }
+
+    const roperTime = () => {
+        lavaRock.remove();
+        lavaRoper.set({"top":840, "left":840});
+        lavaRoper.set({layer: "objects"})
+    }
+
     const whisperStatus = () => {
         const puzzle = puzzles[state.EfreetiPalace.puzzleVersion];
         if (puzzle) {
@@ -583,6 +621,16 @@ var EfreetiPalace = EfreetiPalace || (function() {
             name: "Clues"
         })[0];
 
+        let lavaRoperChar = findObjs({
+             "_type": "character",
+            "name": "Lava Roper"
+         })[0];
+        log(lavaRoperChar)
+        lavaRoper = findObjs({
+             _type:"graphic",
+            "represents": lavaRoperChar.id
+         })[0]
+log(lavaRoper)
         //API Sandbox -- reattach any existing shapes to the in memory object.  numeric levels are already fetched from state
         currentPaths = findObjs({
              _type: "path",
@@ -624,7 +672,15 @@ var EfreetiPalace = EfreetiPalace || (function() {
                         dmgText = '[[3d10]]'
                     }
                     sendChat("Arena", dmgTemplate("Lava is everywhere!", "Touching lava is not recommended", dmgText))
+                } else if (args[1] === '--win') {
+                    if (timer.isRunning() === true) {
+                        timer.stopClock();
+                    }
+                    winPuzzle();
+                } else if (args[1] === '--roper') {
+                    roperTime();
                 }
+
             } else if (args[0] === '!timer') {
                 if (args[1] === '--start') {
                     if (timer.isRunning() === true) {
