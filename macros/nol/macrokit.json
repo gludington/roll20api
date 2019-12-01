@@ -1,0 +1,365 @@
+{
+  "schema_version": 2,
+  "macros": [
+    {
+      "attributes": {
+        "action": "!beyond --import ?{JSON|}",
+        "istokenaction": false,
+        "name": "⚡IMPORT",
+        "visibleto": "all"
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set tint_color|980000",
+        "istokenaction": false,
+        "name": "🔰Bloody",
+        "visibleto": ""
+      },
+      "macrobar": {
+        "color": "#980000",
+        "name": null
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set tint_color|transparent statusmarkers|-dead|-skull",
+        "istokenaction": true,
+        "name": "🔰Clear",
+        "visibleto": ""
+      },
+      "macrobar": {
+        "color": "#4a86e8",
+        "name": null
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set statusmarkers|dead|skull tint_color|980000",
+        "istokenaction": false,
+        "name": "🔰Dead",
+        "visibleto": ""
+      },
+      "macrobar": {
+        "color": "#666666",
+        "name": null
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set light_radius|0 light_dimradius|0 light_otherplayers|off ",
+        "istokenaction": true,
+        "name": "👓Basic",
+        "visibleto": "all"
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set light_radius|60 light_dimradius|0 light_otherplayers|off ",
+        "istokenaction": true,
+        "name": "👓60Dark",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set light_radius|120 light_dimradius|0 light_otherplayers|off ",
+        "istokenaction": true,
+        "name": "👓120Dark",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --on showname showplayers_name  showplayers_bar1 light_hassight --set bar1_link|hp bar2_link|ac light_radius|0 light_dimradius|0",
+        "istokenaction": false,
+        "name": "⚡Initialize",
+        "visibleto": "all"
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set light_radius|40 light_dimradius|20 light_otherplayers|on",
+        "istokenaction": true,
+        "name": "💡40-20",
+        "visibleto": "all"
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set light_radius|120 light_dimradius|120 light_otherplayers|off ",
+        "istokenaction": true,
+        "name": "👓120Devil",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set light_radius|10 light_dimradius|5 light_otherplayers|on",
+        "istokenaction": true,
+        "name": "💡10-5",
+        "visibleto": "all"
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set light_radius|60 light_dimradius|30 light_otherplayers|on",
+        "istokenaction": true,
+        "name": "💡60-30",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcatk} {{attack=1}} {{name=@{selected|token_name}}} {{rname=Potion of Healing}} {{rnamec=Potion of Healing}} {{r1=?{Choose a Potion|Basic, [[2d4+2]]|Greater, [[4d4+4]]|Superior, [[8d4+8]]|Supreme, [[10d4+20]]} HP healed.}} {{normal=1}} {{r2=}} {{description=}}",
+        "istokenaction": true,
+        "name": "🩹Potion",
+        "visibleto": "all"
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set defaulttoken",
+        "istokenaction": false,
+        "name": "⚡DefaultToken",
+        "visibleto": "all"
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcdmg} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{dmg1=[[@{selected|level}d4]]}} {{dmg1type=}} {{dmg2=dmg2}} {{dmg2type=dmg2type}} {{crit=}} {{crit1=crit1}} {{crit2=crit2}}",
+        "istokenaction": false,
+        "name": "DMG-3",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcdmg} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{dmg1=[[@{selected|level}d12]]}} {{dmg1type=}} {{dmg2=dmg2}} {{dmg2type=dmg2type}} {{crit=}} {{crit1=crit1}} {{crit2=crit2}}",
+        "istokenaction": false,
+        "name": "DMG-7",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcdmg} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{dmg1=[[@{selected|level}d8]]}} {{dmg1type=}} {{dmg2=dmg2}} {{dmg2type=dmg2type}} {{crit=}} {{crit1=crit1}} {{crit2=crit2}}",
+        "istokenaction": false,
+        "name": "DMG-5",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcdmg} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{dmg1=[[@{selected|level}d6]]}} {{dmg1type=}} {{dmg2=dmg2}} {{dmg2type=dmg2type}} {{crit=}} {{crit1=crit1}} {{crit2=crit2}}",
+        "istokenaction": false,
+        "name": "DMG-4",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcdmg} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{dmg1=[[@{selected|level}d10]]}} {{dmg1type=}} {{dmg2=dmg2}} {{dmg2type=dmg2type}} {{crit=}} {{crit1=crit1}} {{crit2=crit2}}",
+        "istokenaction": false,
+        "name": "DMG-6",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcatk} {{attack=1}} {{name=@{selected|npc_name}}} {{rname=Attack}} {{rnamec=rnamec}} {{r1=[[1d20+[[round(@{target|level}/2+3)]]]]}} {{always=1}} {{r2=[[1d20+[[round(@{target|level}/2+3)]]]]}} {{description=}}",
+        "istokenaction": false,
+        "name": "ATK",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set light_radius|500 light_dimradius|500 light_otherplayers|off ",
+        "istokenaction": true,
+        "name": "👓Total",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "!token-mod --set tint_color|ff00ff",
+        "istokenaction": false,
+        "name": "🔰FairyFire",
+        "visibleto": ""
+      },
+      "macrobar": {
+        "color": "#ff00ff",
+        "name": null
+      }
+    },
+    {
+      "attributes": {
+        "action": "[g](?{URL(Must end in \".gif\" or \".jpg\")|})",
+        "istokenaction": false,
+        "name": "🎦Chat-Image",
+        "visibleto": ""
+      },
+      "macrobar": {
+        "color": null,
+        "name": null
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:simple} {{rname=1d100}} {{mod=}} {{r1=[[1d100]]}} {{normal=1}} {{charname=|}",
+        "istokenaction": false,
+        "name": "🎲d100",
+        "visibleto": "all"
+      },
+      "macrobar": {
+        "color": null,
+        "name": null
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcaction} {{attack=1}} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{name=vs @{target|character_name}}} {{rname=Trap}} {{r1=[[1d20+[[round(@{target|level}/2+3)]]]]}} {{always=1}} {{r2=[[1d20+[[round(@{target|level}/2+3)]]]]}} {{dmg1=[[2d10]]}} {{dmg1type=}} {{crit1=[[2d10]]}} {{dmg2=}} {{dmg2type=}} {{crit2=}} {{description=}}",
+        "istokenaction": false,
+        "name": "0🏹Tier-1",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcaction} {{attack=1}} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{name=vs @{target|character_name}}} {{rname=Trap}} {{r1=[[1d20+[[round(@{target|level}/2+3)]]]]}} {{always=1}} {{r2=[[1d20+[[round(@{target|level}/2+3)]]]]}} {{dmg1=[[4d10]]}} {{dmg1type=}} {{crit1=[[4d10]]}} {{dmg2=}} {{dmg2type=}} {{crit2=}} {{description=}}",
+        "istokenaction": false,
+        "name": "0🏹Tier-2",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcaction} {{attack=1}} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{name=vs @{target|character_name}}} {{rname=Trap}} {{r1=[[1d20+[[round(@{target|level}/2+3)]]]]}} {{always=1}} {{r2=[[1d20+[[round(@{target|level}/2+3)]]]]}} {{dmg1=[[10d10]]}} {{dmg1type=}} {{crit1=[[10d10]]}} {{dmg2=}} {{dmg2type=}} {{crit2=}} {{description=}}",
+        "istokenaction": false,
+        "name": "0🏹Tier-3",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcaction} {{attack=1}} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{name=vs @{target|character_name}}} {{rname=Trap}} {{r1=[[1d20+[[round(@{target|level}/2+3)]]]]}} {{always=1}} {{r2=[[1d20+[[round(@{target|level}/2+3)]]]]}} {{dmg1=[[18d10]]}} {{dmg1type=}} {{crit1=[[18d10]]}} {{dmg2=}} {{dmg2type=}} {{crit2=}} {{description=}}",
+        "istokenaction": false,
+        "name": "0🏹Tier-4",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcaction} {{attack=1}} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{name=vs @{target|character_name}}} {{rname=Trap}} {{r1=[[8+[[round(@{target|level}/2+3)]]]]}} {{always=1}} {{r2=[[8+[[round(@{target|level}/2+3)]]]]}} {{dmg1=[[2d10]]}} {{dmg1type=}} {{crit1=[[2d10]]}} {{dmg2=}} {{dmg2type=}} {{crit2=}} {{description=}}",
+        "istokenaction": false,
+        "name": "0🧨Tier-1",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcaction} {{attack=1}} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{name=vs @{target|character_name}}} {{rname=Trap}} {{r1=[[8+[[round(@{target|level}/2+3)]]]]}} {{always=1}} {{r2=[[8+[[round(@{target|level}/2+3)]]]]}} {{dmg1=[[18d10]]}} {{dmg1type=}} {{crit1=[[18d10]]}} {{dmg2=}} {{dmg2type=}} {{crit2=}} {{description=}}",
+        "istokenaction": false,
+        "name": "0🧨Tier-4",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcaction} {{attack=1}} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{name=vs @{target|character_name}}} {{rname=Trap}} {{r1=[[8+[[round(@{target|level}/2+3)]]]]}} {{always=1}} {{r2=[[8+[[round(@{target|level}/2+3)]]]]}} {{dmg1=[[10d10]]}} {{dmg1type=}} {{crit1=[[10d10]]}} {{dmg2=}} {{dmg2type=}} {{crit2=}} {{description=}}",
+        "istokenaction": false,
+        "name": "0🧨Tier-3",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:npcaction} {{attack=1}} {{damage=1}} {{dmg1flag=1}} {{dmg2flag=}} {{name=vs @{target|character_name}}} {{rname=Trap}} {{r1=[[8+[[round(@{target|level}/2+3)]]]]}} {{always=1}} {{r2=[[8+[[round(@{target|level}/2+3)]]]]}} {{dmg1=[[4d10]]}} {{dmg1type=}} {{crit1=[[4d10]]}} {{dmg2=}} {{dmg2type=}} {{crit2=}} {{description=}}",
+        "istokenaction": false,
+        "name": "0🧨Tier-2",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "!tl lock",
+        "istokenaction": false,
+        "name": "⛔",
+        "visibleto": ""
+      },
+      "macrobar": {
+        "color": null,
+        "name": null
+      }
+    },
+    {
+      "attributes": {
+        "action": "!tl unlock",
+        "istokenaction": false,
+        "name": "✅",
+        "visibleto": ""
+      },
+      "macrobar": {
+        "color": null,
+        "name": null
+      }
+    },
+    {
+      "attributes": {
+        "action": "/w \n🏹= Trap Attack Roll vs Target (Choose appropriate Tier).\n🧨= Trap with Saving Throw DC (Choose appropriate Tier).\n⚡= Token utilities.\n⛔✅= TokenLock API (Lock / Unlock player tokens).\n🎦= Paste url for a .jpg .gif .png etc.\n🎲= Easy d100 die roller.\n💎= Party vault access.\n👓= Apply vision to selected token.\n💡= Apply lighting to selected token.\n🔰= Tint token (\"Dead\" also applies death markers).\n🩹= Potion macro button.\n✉= Private Message",
+        "istokenaction": false,
+        "name": "00-READ-ME-00",
+        "visibleto": ""
+      }
+    },
+    {
+      "attributes": {
+        "action": "/w @{target|token_name} ?{What would you like to say?|}",
+        "istokenaction": false,
+        "name": "✉Target",
+        "visibleto": "all"
+      },
+      "macrobar": {
+        "color": null,
+        "name": null
+      }
+    },
+    {
+      "attributes": {
+        "action": "/w GM ?{What would you like to say?|}",
+        "istokenaction": false,
+        "name": "✉GM",
+        "visibleto": "all"
+      },
+      "macrobar": {
+        "color": null,
+        "name": null
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:simple} {{rname=Vault Balance}} {{mod=Gold}} {{r1=[[@{Vault|gp}]]}} {{normal=1}}",
+        "istokenaction": false,
+        "name": "💎",
+        "visibleto": "all"
+      },
+      "macrobar": {
+        "color": null,
+        "name": null
+      }
+    },
+    {
+      "attributes": {
+        "action": "&{template:simple} !setattr --fb-public --fb-from Vault --fb-header Depositing: --fb-content _TCUR0_ gold added to the vault. --name Vault --mod --gp|?{Deposit:|0}!!! {{rname=Vault Balance}} {{mod=Gold}} {{r1=[[@{Vault|gp}+?{Deposit:}]]}} {{normal=1}}",
+        "istokenaction": false,
+        "name": "💎Deposit",
+        "visibleto": ""
+      },
+      "macrobar": {
+        "color": null,
+        "name": null
+      }
+    }
+  ]
+}
