@@ -410,15 +410,15 @@ var GiantDiplomacy = GiantDiplomacy || (function() {
             if (round.title && !(_.isEmpty(round.scores))) {
                 text = text + "<h2>" + round.title + "</h2>";
                 text += round.outputScores(round.scores, round.threshold, round.critSuccess, round.critFail);
-                if (round.outputResults) {
+                if (round.completed === true && round.outputResults) {
                     const results = round.outputResults(round.scores, round.threshold);
                     if (results !== "") {
                         if (results === "WIN") {
-                            text += "Grindle lets the small creatures win";
+                            text += "<h3>Grindle</h3> lets the small creatures win";
                         } else if (results === "TIE") {
-                            text += "Grindle lets the players equal him"
+                            text += "<h3>Grindle lets the small creatures equal him</h3>"
                         } else if (results === "LOSS") {
-                            text += "Grindle defeats the foolish small creatures";
+                            text += "<h3>Grindle defeats the foolish small creatures</h3>";
                         } else {
                             text += results;
                         }
@@ -432,6 +432,7 @@ var GiantDiplomacy = GiantDiplomacy || (function() {
     const simpleSuccessFailure = (scores, threshold) => {
         let text = "";
         _.each(_.keys(scores), (key) => {
+            log(key)
             text = text + "<p>" + key + " = " + (scores[key] >= threshold ? "Success" : "Failure") + "</p>"
         });
         return text;
@@ -616,25 +617,29 @@ var GiantDiplomacy = GiantDiplomacy || (function() {
                     if (args[3] === 'clear') {
                         _.each(contestData, (round) => {
                             round.scores = {}
+                            round.completed = false;
                         });
                         writeScoreboard();
                     } else {
                         const round = findRound(args[3]);
                         if (round && round[0]) {
-                            _.each(msg.selected, (obj) => {
-                                const token = getObj('graphic', obj._id);
-                            if (token) {
-                                const character = getObj("character", token.get("represents"));
-                                if (character) {
-                                    if (round[0].updateScore) {
-                                        round[0].updateScore(character, round[0], args[4]);
-                                    } else {
-                                        updateScore(character, round[0], args[4]);
+                            if (args[2] === 'complete') {
+                                round[0].completed = args[4] > 0;
+                            } else {
+                                _.each(msg.selected, (obj) => {
+                                    const token = getObj('graphic', obj._id);
+                                    if (token) {
+                                        const character = getObj("character", token.get("represents"));
+                                        if (character) {
+                                            if (round[0].updateScore) {
+                                                round[0].updateScore(character, round[0], args[4]);
+                                            } else {
+                                                updateScore(character, round[0], args[4]);
+                                            }
+                                        }
                                     }
+                                });
                                 }
-                            }
-                        })
-                            ;
                             writeScoreboard();
                         } else {
                             log("Missing or invalid round: " + args[3]);
