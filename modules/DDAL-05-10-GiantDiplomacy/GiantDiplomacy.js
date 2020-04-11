@@ -580,7 +580,7 @@ var GiantDiplomacy = GiantDiplomacy || (function() {
                             if (grindleValue === maxPlayer) {
                                 return "TIE";
                             } else {
-                                return grindleValue > maxPlayer ? "Nobody eats more than Grindle!" : "WIN";
+                                return grindleValue > maxPlayer ? "<h3>Nobody eats more than Grindle!</h3>" : "<h3>Smol creature outate Grindle</h3>";
                             }
                         } else {
                             return "";
