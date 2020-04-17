@@ -534,7 +534,10 @@ var GiantDiplomacy = GiantDiplomacy || (function() {
             } else {
                 round.scores[charName][dogRound] = undefined;
             }
-            const roundScores = _.compact(_.initial(round.scores[charName]));
+            const roundScores = _.filter(_.initial(round.scores[charName]), (o) => {
+                var val = parseInt(o);
+                return val !== NaN && val > -1;
+            });
             if (roundScores.length === 0) {
                 delete round.scores[charName];
             } else {
