@@ -616,14 +616,14 @@ var GiantDiplomacy = GiantDiplomacy || (function() {
             }
             const args = msg.content.match(/^(!&#13;)?!contest --([A-Za-z]+) ([A-Za-z0-9]+) (-?[\|0-9]+)/);
             if (args && args[2] && args[3] && args[4]) {
-                if (msg.selected) {
-                    if (args[3] === 'clear') {
-                        _.each(contestData, (round) => {
-                            round.scores = {}
-                            round.completed = false;
-                        });
-                        writeScoreboard();
-                    } else {
+                if (args[3] === 'clear') {
+                    _.each(contestData, (round) => {
+                        round.scores = {}
+                        round.completed = false;
+                    });
+                    writeScoreboard();
+                } else {
+                    if (msg.selected) {
                         const round = findRound(args[3]);
                         if (round && round[0]) {
                             if (args[2] === 'complete') {
@@ -642,14 +642,14 @@ var GiantDiplomacy = GiantDiplomacy || (function() {
                                         }
                                     }
                                 });
-                                }
+                            }
                             writeScoreboard();
                         } else {
                             log("Missing or invalid round: " + args[3]);
                         }
+                    } else {
+                        log("No tokens selected")
                     }
-                } else {
-                    log("No tokens selected")
                 }
             }
         });
